@@ -40,10 +40,10 @@ class AppTheme {
 
   // Background Gradient
   static const LinearGradient backgroundGradient = LinearGradient(
-    colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-  );
+  colors: [Color(0xFF0F3460), Color(0xFF1A1A2E), Color(0xFF16213E)],
+  begin: Alignment.topCenter,
+  end: Alignment.bottomCenter,
+);
 
   // Text Colors
   static const Color primaryText = Color(0xFFFFFFFF);

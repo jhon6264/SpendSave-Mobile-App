@@ -4,6 +4,11 @@ import 'package:spend_save/utils/app_theme.dart';
 import 'package:spend_save/models/saving_goal.dart';
 import 'package:spend_save/services/hive_service.dart';
 import 'package:spend_save/screens/add_savings_screen.dart';
+import 'package:spend_save/screens/add_funds_screen.dart';
+import 'package:spend_save/screens/withdraw_funds_screen.dart';
+import 'package:spend_save/screens/savings_history_screen.dart';
+import 'package:spend_save/models/savings_activity.dart';
+import 'package:spend_save/widgets/animated_background.dart';
 
 class SavingsScreen extends StatefulWidget {
   const SavingsScreen({super.key});
@@ -17,7 +22,7 @@ class _SavingsScreenState extends State<SavingsScreen>
   List<SavingGoal> _savingsGoals = [];
   bool _isLoading = true;
 
-  // Animation controller for total savings card only
+  // Animation controllers
   late AnimationController _totalSavingsAnimationController;
   late Animation<double> _colorCycleAnimation;
   
@@ -25,9 +30,33 @@ class _SavingsScreenState extends State<SavingsScreen>
   final List<Color> _cycleColors1 = [const Color(0xFF8A2BE2), const Color(0xFF4B0082)];
   final List<Color> _cycleColors2 = [const Color(0xFF1E90FF), const Color(0xFF00BFFF)];
   final List<Color> _cycleColors3 = [const Color(0xFF00B09B), const Color(0xFF96C93D)];
-
-  // Animation for long press feedback
+  
+  // Animation controllers for long press
   final Map<String, AnimationController> _pressAnimationControllers = {};
+
+  // Available icons for edit modal
+  final List<IconData> _availableIcons = [
+    FontAwesomeIcons.piggyBank,
+    FontAwesomeIcons.house,
+    FontAwesomeIcons.car,
+    FontAwesomeIcons.plane,
+    FontAwesomeIcons.graduationCap,
+    FontAwesomeIcons.heart,
+    FontAwesomeIcons.baby,
+    FontAwesomeIcons.stethoscope,
+    FontAwesomeIcons.tv,
+    FontAwesomeIcons.gamepad,
+    FontAwesomeIcons.dumbbell,
+    FontAwesomeIcons.book,
+    FontAwesomeIcons.music,
+    FontAwesomeIcons.camera,
+    FontAwesomeIcons.bicycle,
+    FontAwesomeIcons.gift,
+    FontAwesomeIcons.tree,
+    FontAwesomeIcons.handsHelping,
+    FontAwesomeIcons.briefcase,
+    FontAwesomeIcons.chartLine,
+  ];
 
   @override
   void initState() {
@@ -52,7 +81,6 @@ class _SavingsScreenState extends State<SavingsScreen>
   @override
   void dispose() {
     _totalSavingsAnimationController.dispose();
-    // Dispose press animation controllers
     for (var controller in _pressAnimationControllers.values) {
       controller.dispose();
     }
@@ -105,30 +133,6 @@ class _SavingsScreenState extends State<SavingsScreen>
     }
   }
 
-  // Available icons (same as add_savings_screen)
-  final List<IconData> _availableIcons = [
-    FontAwesomeIcons.piggyBank,
-    FontAwesomeIcons.house,
-    FontAwesomeIcons.car,
-    FontAwesomeIcons.plane,
-    FontAwesomeIcons.graduationCap,
-    FontAwesomeIcons.heart,
-    FontAwesomeIcons.baby,
-    FontAwesomeIcons.stethoscope,
-    FontAwesomeIcons.tv,
-    FontAwesomeIcons.gamepad,
-    FontAwesomeIcons.dumbbell,
-    FontAwesomeIcons.book,
-    FontAwesomeIcons.music,
-    FontAwesomeIcons.camera,
-    FontAwesomeIcons.bicycle,
-    FontAwesomeIcons.gift,
-    FontAwesomeIcons.tree,
-    FontAwesomeIcons.handsHelping,
-    FontAwesomeIcons.briefcase,
-    FontAwesomeIcons.chartLine,
-  ];
-
   // Show edit modal for savings goal
   void _showEditSavingsModal(SavingGoal goal) {
     showDialog(
@@ -144,36 +148,24 @@ class _SavingsScreenState extends State<SavingsScreen>
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Simple centered title
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: AppTheme.paddingMedium,
-                ),
-                child: Center(
-                  child: Text(
-                    'Savings',
-                    style: AppTheme.headline3,
-                  ),
-                ),
-              ),
 
-              // Main Content - Scrollable
-              Expanded(
-                child: _isLoading
-                    ? _buildLoadingState()
-                    : _savingsGoals.isEmpty
-                        ? _buildEmptyState()
-                        : _buildWithSavings(),
+  @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: AnimatedBackground(
+      child: SafeArea(
+        child: Column(
+          children: [
+            // REMOVED TITLE HEADER - Only SafeArea padding
+            const SizedBox(height: 10),
+
+            // Main Content - Scrollable
+            Expanded(
+              child: _isLoading
+                  ? _buildLoadingState()
+                  : _savingsGoals.isEmpty
+                      ? _buildEmptyState()
+                      : _buildWithSavings(),
               ),
             ],
           ),
@@ -402,7 +394,7 @@ class _SavingsScreenState extends State<SavingsScreen>
         animationController.forward();
       },
       onLongPressEnd: (details) {
-        // Bounce back animation then show modal
+        // Bounce back animation then show modal with fade+scale
         animationController.reverse().then((_) {
           Future.delayed(const Duration(milliseconds: 100), () {
             _showEditSavingsModal(goal);
@@ -537,12 +529,12 @@ class _SavingsScreenState extends State<SavingsScreen>
         // First row of icon buttons
         Row(
           children: [
-            // New Button (Piggy Bank) - Reduced shadow to match others
+            // New Button (Piggy Bank) - Reduced shadow
             Expanded(
               child: _buildIconButtonCard(
                 icon: FontAwesomeIcons.piggyBank,
                 color: const Color(0xFF6A11CB),
-                shadowOpacity: 0.3, // Reduced from 0.4 to match others
+                shadowOpacity: 0.3,
                 onTap: () {
                   Navigator.push(
                     context,
@@ -558,14 +550,21 @@ class _SavingsScreenState extends State<SavingsScreen>
             
             // Add Funds Button (Money Bill Wave)
             Expanded(
-              child: _buildIconButtonCard(
-                icon: FontAwesomeIcons.moneyBillWave,
-                color: const Color(0xFF00B09B),
-                shadowOpacity: 0.3,
-                onTap: () => _showComingSoon('Add Funds'),
-                label: 'Add Funds',
-              ),
-            ),
+  child: _buildIconButtonCard(
+    icon: FontAwesomeIcons.moneyBillWave,
+    color: const Color(0xFF00B09B),
+    shadowOpacity: 0.3,
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const AddFundsScreen(),
+        ),
+      ).then((_) => _refreshData()); // Refresh data when returning
+    },
+    label: 'Add Funds',
+  ),
+),
           ],
         ),
         
@@ -576,26 +575,41 @@ class _SavingsScreenState extends State<SavingsScreen>
           children: [
             // Withdraw Button (Money Check)
             Expanded(
-              child: _buildIconButtonCard(
-                icon: FontAwesomeIcons.moneyCheck,
-                color: const Color(0xFFFF7E5F),
-                shadowOpacity: 0.3,
-                onTap: () => _showComingSoon('Withdraw'),
-                label: 'Withdraw',
-              ),
-            ),
+  child: _buildIconButtonCard(
+    icon: FontAwesomeIcons.moneyCheck,
+    color: const Color(0xFFFF7E5F),
+    shadowOpacity: 0.3,
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const WithdrawFundsScreen(),
+        ),
+      ).then((_) => _refreshData()); // Refresh data when returning
+    },
+    label: 'Withdraw',
+  ),
+),
             const SizedBox(width: 10),
             
             // History Button (Clock Rotate Left)
             Expanded(
-              child: _buildIconButtonCard(
-                icon: FontAwesomeIcons.clockRotateLeft,
-                color: const Color(0xFF1E90FF),
-                shadowOpacity: 0.3,
-                onTap: () => _showComingSoon('History'),
-                label: 'History',
-              ),
-            ),
+  child: _buildIconButtonCard(
+    icon: FontAwesomeIcons.clockRotateLeft,
+    color: const Color(0xFF1E90FF),
+    shadowOpacity: 0.3,
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const SavingsHistoryScreen(),
+        ),
+      );
+      // No refresh needed for history screen
+    },
+    label: 'History',
+  ),
+),
           ],
         ),
       ],
@@ -724,7 +738,7 @@ class _SavingsScreenState extends State<SavingsScreen>
   }
 }
 
-// ========== EDIT SAVINGS MODAL ==========
+// ========== EDIT SAVINGS MODAL (UPDATED WITH FADE+SCALE ANIMATION) ==========
 class EditSavingsModal extends StatefulWidget {
   final SavingGoal goal;
   final List<IconData> availableIcons;
@@ -741,18 +755,88 @@ class EditSavingsModal extends StatefulWidget {
   State<EditSavingsModal> createState() => _EditSavingsModalState();
 }
 
-class _EditSavingsModalState extends State<EditSavingsModal> {
+class _EditSavingsModalState extends State<EditSavingsModal> with SingleTickerProviderStateMixin {
   late TextEditingController _nameController;
   late int _selectedColorIndex;
   late int _selectedIconIndex;
-  late String _originalIconCode;
+  late AnimationController _dialogAnimationController;
+  late Animation<double> _dialogOpacityAnimation;
+  late Animation<double> _dialogScaleAnimation;
+
+  void _showDeleteConfirmation(BuildContext context, SavingGoal goal) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      backgroundColor: const Color(0xFF203A43),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppTheme.borderRadius),
+      ),
+      title: Text(
+        'Delete Savings Goal',
+        style: AppTheme.headline4.copyWith(color: Colors.white),
+      ),
+      content: Text(
+        'Are you sure you want to delete "${goal.name}"? This action cannot be undone.',
+        style: AppTheme.bodyText1,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(
+            'Cancel',
+            style: AppTheme.bodyText1.copyWith(color: Colors.white70),
+          ),
+        ),
+        TextButton(
+          onPressed: () async {
+            Navigator.pop(context); // Close confirmation dialog
+            Navigator.pop(context); // Close edit dialog
+            
+            // Mark goal as inactive instead of deleting
+            final deletedGoal = SavingGoal(
+              id: goal.id,
+              name: goal.name,
+              iconCode: goal.iconCode,
+              colorIndex: goal.colorIndex,
+              targetAmount: goal.targetAmount,
+              currentAmount: goal.currentAmount,
+              description: goal.description,
+              targetDate: goal.targetDate,
+              createdAt: goal.createdAt,
+              isActive: false, // Set to inactive
+            );
+            
+            await HiveService.updateSavingsGoal(deletedGoal);
+            
+            // Log deletion activity
+            await HiveService.logSavingsActivity(
+              SavingsActivity(
+                type: SavingsActivityType.goalDeleted,
+                goalName: goal.name,
+                goalIcon: goal.iconCode,
+                timestamp: DateTime.now(),
+                goalId: goal.id,
+                targetAmount: goal.targetAmount > 0 ? goal.targetAmount : null,
+              ),
+            );
+            
+            widget.onSave(deletedGoal); // This will refresh the parent screen
+          },
+          child: Text(
+            'Delete',
+            style: AppTheme.bodyText1.copyWith(color: Colors.red),
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.goal.name);
     _selectedColorIndex = widget.goal.colorIndex;
-    _originalIconCode = widget.goal.iconCode;
     
     // Find the current icon index
     _selectedIconIndex = widget.availableIcons.indexWhere(
@@ -761,11 +845,39 @@ class _EditSavingsModalState extends State<EditSavingsModal> {
     if (_selectedIconIndex == -1) {
       _selectedIconIndex = 0;
     }
+    
+    // Dialog animation controller
+    _dialogAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    
+    _dialogOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _dialogAnimationController,
+        curve: Curves.easeIn,
+      ),
+    );
+    
+    _dialogScaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _dialogAnimationController,
+        curve: Curves.easeOutBack,
+      ),
+    );
+    
+    // Start animation
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _dialogAnimationController.forward();
+    });
   }
+
+  
 
   @override
   void dispose() {
     _nameController.dispose();
+    _dialogAnimationController.dispose();
     super.dispose();
   }
 
@@ -789,201 +901,220 @@ class _EditSavingsModalState extends State<EditSavingsModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.all(20),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: AppTheme.envelopeColorOptions[_selectedColorIndex],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(AppTheme.borderRadius),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Header with Back and Check icons
-            Padding(
-              padding: const EdgeInsets.all(AppTheme.paddingMedium),
-              child: Row(
-                children: [
-                  // Back button
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+    return AnimatedBuilder(
+      animation: _dialogAnimationController,
+      builder: (context, child) {
+        return Opacity(
+          opacity: _dialogOpacityAnimation.value,
+          child: Transform.scale(
+            scale: _dialogScaleAnimation.value,
+            child: Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: const EdgeInsets.all(20),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: AppTheme.envelopeColorOptions[_selectedColorIndex],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  const Spacer(),
-                  // Check button
-                  IconButton(
-                    onPressed: _saveChanges,
-                    icon: const Icon(Icons.check, color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-
-            // Name Field (Large, Centered)
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppTheme.paddingLarge,
-                vertical: AppTheme.paddingMedium,
-              ),
-              child: TextField(
-                controller: _nameController,
-                textAlign: TextAlign.center,
-                style: AppTheme.headline3.copyWith(
-                  fontSize: 24,
-                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(AppTheme.borderRadius),
                 ),
-                decoration: InputDecoration(
-                  hintText: 'Goal name',
-                  hintStyle: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
-                    fontSize: 24,
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.zero,
-                ),
-                onChanged: (value) => setState(() {}),
-              ),
-            ),
-
-            // Color Selection (Horizontal Scrollable)
-            Padding(
-              padding: const EdgeInsets.only(
-                left: AppTheme.paddingMedium,
-                right: AppTheme.paddingMedium,
-                bottom: AppTheme.paddingMedium,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: AppTheme.paddingMedium,
-                      bottom: 8,
-                    ),
-                    child: Text(
-                      'COLOR',
-                      style: AppTheme.bodyText2.copyWith(
-                        fontSize: 11,
-                        color: Colors.white.withOpacity(0.8),
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 60,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: AppTheme.envelopeColorOptions.length,
-                      itemBuilder: (context, index) {
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() => _selectedColorIndex = index);
-                          },
-                          child: Container(
-                            width: 50,
-                            height: 50,
-                            margin: const EdgeInsets.only(right: 10),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: AppTheme.envelopeColorOptions[index],
-                              ),
-                              borderRadius: BorderRadius.circular(25),
-                              border: Border.all(
-                                color: _selectedColorIndex == index
-                                    ? Colors.white
-                                    : Colors.transparent,
-                                width: 3,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Icon Selection (Horizontal Scrollable)
-            Padding(
-              padding: const EdgeInsets.only(
-                left: AppTheme.paddingMedium,
-                right: AppTheme.paddingMedium,
-                bottom: AppTheme.paddingLarge,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: AppTheme.paddingMedium,
-                      bottom: 8,
-                    ),
-                    child: Text(
-                      'ICON',
-                      style: AppTheme.bodyText2.copyWith(
-                        fontSize: 11,
-                        color: Colors.white.withOpacity(0.8),
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 60,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: widget.availableIcons.length,
-                      itemBuilder: (context, index) {
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() => _selectedIconIndex = index);
-                          },
-                          child: Container(
-                            width: 50,
-                            height: 50,
-                            margin: const EdgeInsets.only(right: 10),
-                            decoration: BoxDecoration(
-                              color: _selectedIconIndex == index
-                                  ? Colors.white.withOpacity(0.2)
-                                  : Colors.white.withOpacity(0.05),
-                              borderRadius: BorderRadius.circular(25),
-                              border: Border.all(
-                                color: _selectedIconIndex == index
-                                    ? Colors.white
-                                    : Colors.transparent,
-                                width: 3,
-                              ),
-                            ),
-                            child: Center(
-                              child: FaIcon(
-                                widget.availableIcons[index],
-                                color: Colors.white,
-                                size: 22,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Header with Back and Check icons
+                    Padding(
+  padding: const EdgeInsets.all(AppTheme.paddingMedium),
+  child: Row(
+    children: [
+      // Back button
+      IconButton(
+        onPressed: () => Navigator.pop(context),
+        icon: const Icon(Icons.arrow_back, color: Colors.white),
       ),
+      const Spacer(),
+      
+      // Trash button (Delete) - NEW
+      IconButton(
+        onPressed: () => _showDeleteConfirmation(context, widget.goal),
+        icon: const Icon(Icons.delete, color: Colors.red, size: 22),
+      ),
+      const SizedBox(width: 5), // 3-5px gap
+      
+      // Check button
+      IconButton(
+        onPressed: _saveChanges,
+        icon: const Icon(Icons.check, color: Colors.white, size: 22),
+      ),
+    ],
+  ),
+),
+
+                    // Name Field (Large, Centered)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppTheme.paddingLarge,
+                        vertical: AppTheme.paddingMedium,
+                      ),
+                      child: TextField(
+                        controller: _nameController,
+                        textAlign: TextAlign.center,
+                        style: AppTheme.headline3.copyWith(
+                          fontSize: 24,
+                          color: Colors.white,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Goal name',
+                          hintStyle: TextStyle(
+                            color: Colors.white.withOpacity(0.6),
+                            fontSize: 24,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        onChanged: (value) => setState(() {}),
+                      ),
+                    ),
+
+                    // Color Selection (Horizontal Scrollable)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: AppTheme.paddingMedium,
+                        right: AppTheme.paddingMedium,
+                        bottom: AppTheme.paddingMedium,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: AppTheme.paddingMedium,
+                              bottom: 8,
+                            ),
+                            child: Text(
+                              'COLOR',
+                              style: AppTheme.bodyText2.copyWith(
+                                fontSize: 11,
+                                color: Colors.white.withOpacity(0.8),
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 60,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: AppTheme.envelopeColorOptions.length,
+                              itemBuilder: (context, index) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() => _selectedColorIndex = index);
+                                  },
+                                  child: Container(
+                                    width: 50,
+                                    height: 50,
+                                    margin: const EdgeInsets.only(right: 10),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: AppTheme.envelopeColorOptions[index],
+                                      ),
+                                      borderRadius: BorderRadius.circular(25),
+                                      border: Border.all(
+                                        color: _selectedColorIndex == index
+                                            ? Colors.white
+                                            : Colors.transparent,
+                                        width: 3,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.2),
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Icon Selection (Horizontal Scrollable)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: AppTheme.paddingMedium,
+                        right: AppTheme.paddingMedium,
+                        bottom: AppTheme.paddingLarge,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: AppTheme.paddingMedium,
+                              bottom: 8,
+                            ),
+                            child: Text(
+                              'ICON',
+                              style: AppTheme.bodyText2.copyWith(
+                                fontSize: 11,
+                                color: Colors.white.withOpacity(0.8),
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 60,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: widget.availableIcons.length,
+                              itemBuilder: (context, index) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() => _selectedIconIndex = index);
+                                  },
+                                  child: Container(
+                                    width: 50,
+                                    height: 50,
+                                    margin: const EdgeInsets.only(right: 10),
+                                    decoration: BoxDecoration(
+                                      color: _selectedIconIndex == index
+                                          ? Colors.white.withOpacity(0.2)
+                                          : Colors.white.withOpacity(0.05),
+                                      borderRadius: BorderRadius.circular(25),
+                                      border: Border.all(
+                                        color: _selectedIconIndex == index
+                                            ? Colors.white
+                                            : Colors.transparent,
+                                        width: 3,
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: FaIcon(
+                                        widget.availableIcons[index],
+                                        color: Colors.white,
+                                        size: 22,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

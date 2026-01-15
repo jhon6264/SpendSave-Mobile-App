@@ -6,6 +6,7 @@ import 'package:spend_save/models/custom_envelope.dart';
 import 'package:spend_save/models/budget_period.dart';
 import 'package:spend_save/services/hive_service.dart';
 import 'package:spend_save/models/activity.dart';
+import 'package:spend_save/widgets/animated_background.dart';
 
 class BudgetCreationScreen extends StatefulWidget {
   const BudgetCreationScreen({super.key});
@@ -288,14 +289,10 @@ class _BudgetCreationScreenState extends State<BudgetCreationScreen> {
     final namedEnvelopes = _createdEnvelopes
         .where((env) => env.name.isNotEmpty)
         .toList();
-    
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
-        child: SafeArea(
-          child: Column(
+  return Scaffold(
+    body: AnimatedBackground(
+      child: SafeArea(
+        child: Column(
             children: [
               // Simple Header
               Padding(

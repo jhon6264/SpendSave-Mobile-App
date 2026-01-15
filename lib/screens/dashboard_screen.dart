@@ -2,18 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:spend_save/utils/app_theme.dart';
 import 'package:spend_save/widgets/glass_card.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
+import 'package:spend_save/widgets/animated_background.dart';
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
-        child: SafeArea(
+  return Scaffold(
+    body: AnimatedBackground(
+      child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(AppTheme.paddingMedium),
             child: Column(

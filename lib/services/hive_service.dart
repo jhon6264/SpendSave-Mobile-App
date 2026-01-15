@@ -5,6 +5,7 @@ import '../models/budget_period.dart';
 import '../models/transaction.dart';
 import '../models/saving_goal.dart';
 import '../models/activity.dart';
+import '../models/savings_activity.dart';
 
 class HiveService {
   static late Box settingsBox;
@@ -13,6 +14,7 @@ class HiveService {
   static late Box<Transaction> transactionBox;
   static late Box<SavingGoal> savingsBox;
   static late Box<Activity> activityBox;
+  static late Box<SavingsActivity> savingsActivityBox;
 
   static SavingGoal? getSavingsGoal(String id) {
   try {
@@ -46,6 +48,47 @@ static Future<bool> addFundsToGoal(String goalId, double amount) async {
   }
 }
 
+  static Future<void> logSavingsActivity(SavingsActivity activity) async {
+  await savingsActivityBox.add(activity);
+  print('📝 Savings Activity logged: ${activity.title}');
+}
+
+static List<SavingsActivity> getSavingsActivities() {
+  return savingsActivityBox.values.toList()
+    ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+}
+
+static List<SavingsActivity> getFilteredSavingsActivities(DateTimeFilter filter) {
+  final activities = getSavingsActivities();
+  final now = DateTime.now();
+  
+  switch (filter) {
+    case DateTimeFilter.today:
+      final today = DateTime(now.year, now.month, now.day);
+      return activities.where((a) => a.timestamp.isAfter(today)).toList();
+    
+    case DateTimeFilter.last7Days:
+      final weekAgo = now.subtract(const Duration(days: 7));
+      return activities.where((a) => a.timestamp.isAfter(weekAgo)).toList();
+    
+    case DateTimeFilter.thisMonth:
+      final firstDay = DateTime(now.year, now.month, 1);
+      return activities.where((a) => a.timestamp.isAfter(firstDay)).toList();
+    
+    case DateTimeFilter.lastMonth:
+      final firstDayLastMonth = DateTime(now.year, now.month - 1, 1);
+      final lastDayLastMonth = DateTime(now.year, now.month, 0);
+      return activities.where((a) => 
+        a.timestamp.isAfter(firstDayLastMonth) && 
+        a.timestamp.isBefore(lastDayLastMonth)
+      ).toList();
+    
+    case DateTimeFilter.all:
+    default:
+      return activities;
+  }
+}
+
 // Withdraw funds from savings goal
 static Future<bool> withdrawFundsFromGoal(String goalId, double amount) async {
   try {
@@ -76,6 +119,9 @@ static Future<bool> withdrawFundsFromGoal(String goalId, double amount) async {
     Hive.registerAdapter(SavingGoalAdapter());
     Hive.registerAdapter(ActivityAdapter());
     Hive.registerAdapter(ActivityTypeAdapter());
+    Hive.registerAdapter(SavingsActivityAdapter());
+    Hive.registerAdapter(SavingsActivityTypeAdapter());
+    savingsActivityBox = await Hive.openBox<SavingsActivity>('savings_activities');
 
     // Open boxes
     settingsBox = await Hive.openBox('settings');

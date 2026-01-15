@@ -4,6 +4,7 @@ import 'package:spend_save/utils/app_theme.dart';
 import 'package:spend_save/widgets/glass_card.dart';
 import 'package:spend_save/models/saving_goal.dart';
 import 'package:spend_save/services/hive_service.dart';
+import 'package:spend_save/widgets/animated_background.dart';
 
 
 class AddSavingsScreen extends StatefulWidget {
@@ -102,13 +103,10 @@ class _AddSavingsScreenState extends State<AddSavingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
-        child: SafeArea(
-          child: Column(
+  return Scaffold(
+    body: AnimatedBackground(
+      child: SafeArea(
+        child: Column(
             children: [
               // Header with back button
               Padding(

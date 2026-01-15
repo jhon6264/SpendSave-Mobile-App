@@ -6,6 +6,7 @@ import 'package:spend_save/models/custom_envelope.dart';
 import 'package:spend_save/models/budget_period.dart';
 import 'package:spend_save/models/activity.dart';
 import 'package:spend_save/services/hive_service.dart';
+import 'package:spend_save/widgets/animated_background.dart';
 
 class EditBudgetScreen extends StatefulWidget {
   final VoidCallback? onBudgetUpdated;
@@ -406,13 +407,10 @@ class _EditBudgetScreenState extends State<EditBudgetScreen> {
     final totalPercentage = _totalPercentage;
     final isValid = totalPercentage == 100.0;
 
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
-        child: SafeArea(
-          child: Column(
+  return Scaffold(
+    body: AnimatedBackground(
+      child: SafeArea(
+        child: Column(
             children: [
               // Header
               Padding(

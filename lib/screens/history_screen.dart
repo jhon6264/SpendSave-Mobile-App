@@ -4,6 +4,7 @@ import 'package:spend_save/utils/app_theme.dart';
 import 'package:spend_save/widgets/glass_card.dart';
 import 'package:spend_save/models/activity.dart';
 import 'package:spend_save/services/hive_service.dart';
+import 'package:spend_save/widgets/animated_background.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -81,13 +82,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
-        child: SafeArea(
-          child: Column(
+  return Scaffold(
+    body: AnimatedBackground(
+      child: SafeArea(
+        child: Column(
             children: [
               // Header
               Padding(
